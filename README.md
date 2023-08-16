@@ -3,7 +3,6 @@
 ![coverage](.github/badges/jacoco.svg)
 ![branches coverage](.github/badges/branches.svg)
 
-
 # RWebPulse
 
 RWebPulse is a ready to consume JAR library to easily integrate your springboot project with the latest reactive web-client offered by the spring. It is a one stop solution with config based initialisations, exception and retry handling.
