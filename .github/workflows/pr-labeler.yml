@@ -19,6 +19,6 @@ jobs:
     steps:
     - uses: actions/labeler@v4
       with:
-        repo-token: "${{ secrets.RWPulse_ACCESS_TOKEN }}"
+        repo-token: "${{ secrets.RWPULSE_ACCESS_TOKEN }}"
         sync-labels: true
         dot: true

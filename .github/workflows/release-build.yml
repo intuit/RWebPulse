@@ -9,7 +9,7 @@ jobs:
   release-on-push:
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.RWPulse_ACCESS_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.RWPULSE_ACCESS_TOKEN }}
     steps:
       - id: release
         name: Release Tag
