@@ -75,4 +75,4 @@ protected ClientHttpResponse<Map> executeRequest(final Map<String, Object> body)
 
 
 ## Local Development
-[Local Development](./LOCAL_DEVELOPMENT.md)
+[Local Development](./GETTING_STARTED.md)
