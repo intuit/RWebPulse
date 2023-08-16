@@ -1,3 +1,9 @@
+[![Build Status](https://github.com/intuit/chain-z/actions/workflows/maven-build.yml/badge.svg)](https://github.com/intuit/chain-z/actions/workflows/maven-build.yml)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.intuit.async/chain-z/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.intuit.async/chain-z)
+![coverage](.github/badges/jacoco.svg)
+![branches coverage](.github/badges/branches.svg)
+
+
 # RWebPulse
 
 RWebPulse is a ready to consume JAR library to easily integrate your springboot project with the latest reactive web-client offered by the spring. It is a one stop solution with config based initialisations, exception and retry handling.
@@ -75,4 +81,4 @@ protected ClientHttpResponse<Map> executeRequest(final Map<String, Object> body)
 
 
 ## Local Development
-[Local Development](./LOCAL_DEVELOPMENT.md)
+[Local Development](./GETTING_STARTED.md)
