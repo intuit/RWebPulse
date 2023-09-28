@@ -1,6 +1,8 @@
 package com.intuit.springwebclient.client;
 
 import com.intuit.springwebclient.entity.ClientHttpRequest;
+import com.intuit.springwebclient.entity.ClientHttpRequest.ClientHttpRequestBuilder;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +41,7 @@ public class CommonSpringWebClientTest {
 
     @Test
     public void testSyncHttpResponseSuccess() {
-        ClientHttpRequest clientHttpRequest = createClientHttpRequest();
+        ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
         mockRequestBody();
 
         Mockito.when(headersSpec.retrieve()).thenReturn(responseSpec);
@@ -48,11 +50,25 @@ public class CommonSpringWebClientTest {
 
         commonSpringWebClient.syncHttpResponse(clientHttpRequest);
     }
+    
+	@Test
+	public void testSyncHttpResponseSuccessNoRequestBody() {
+		ClientHttpRequest clientHttpRequest = createClientHttpRequest().request(null).requestType(null).build();
+		Mockito.when(webClient.method(HttpMethod.GET)).thenReturn(requestBodyUriSpec);
+	    Mockito.doReturn(requestBodyUriSpec).when(requestBodyUriSpec).uri("test-url");
+	    Mockito.when(requestBodyUriSpec.headers(Mockito.any())).thenReturn(requestBodySpec);
+
+		Mockito.when(headersSpec.retrieve()).thenReturn(responseSpec);
+		Mockito.when(responseSpec.bodyToMono(ParameterizedTypeReference.forType(String.class)))
+				.thenReturn(Mono.just("ztest"));
+
+		commonSpringWebClient.syncHttpResponse(clientHttpRequest);
+	}
 
     @Test
     public void testHttpStatusCodeException() {
 
-        ClientHttpRequest clientHttpRequest = createClientHttpRequest();
+        ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
         mockRequestBody();
 
         HttpClientErrorException httpClientErrorException = Mockito.mock(HttpClientErrorException.class);
@@ -67,7 +83,7 @@ public class CommonSpringWebClientTest {
 
     @Test
     public void testUnknownContentTypeException() {
-        ClientHttpRequest clientHttpRequest = createClientHttpRequest();
+        ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
         mockRequestBody();
 
         UnknownContentTypeException unknownContentTypeException = Mockito.mock(UnknownContentTypeException.class);
@@ -82,7 +98,7 @@ public class CommonSpringWebClientTest {
 
     @Test
     public void testOtherException() {
-        ClientHttpRequest clientHttpRequest = createClientHttpRequest();
+        ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
         mockRequestBody();
 
         Mockito.when(headersSpec.retrieve()).thenThrow(IllegalArgumentException.class);
@@ -90,7 +106,7 @@ public class CommonSpringWebClientTest {
         commonSpringWebClient.syncHttpResponse(clientHttpRequest);
     }
 
-    private ClientHttpRequest createClientHttpRequest() {
+    private ClientHttpRequestBuilder<Object, Object> createClientHttpRequest() {
         HttpHeaders httpHeadersMock = new HttpHeaders();
         Consumer<HttpHeaders> httpHeadersConsumer = new Consumer<HttpHeaders>() {
             @Override
@@ -106,8 +122,7 @@ public class CommonSpringWebClientTest {
                 .requestHeaders(httpHeadersMock)
                 .requestType(ParameterizedTypeReference.forType(String.class))
                 .request("hello")
-                .responseType(ParameterizedTypeReference.forType(String.class))
-                .build();
+                .responseType(ParameterizedTypeReference.forType(String.class));
     }
 
     private void mockRequestBody() {
