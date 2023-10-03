@@ -11,10 +11,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.UnknownContentTypeException;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
+
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -60,19 +63,27 @@ public class CommonSpringWebClient {
     }
 
     /**
-     * Generate Web Client Response spec from http request.
-     * @param httpRequest
-     * @return
-     */
-    private WebClient.ResponseSpec generateResponseSpec(ClientHttpRequest httpRequest) {
+	 * Generate Web Client Response spec from http request.
+	 * 
+	 * @param httpRequest
+	 * @return
+	 */
+	private <REQUEST, RESPONSE> WebClient.ResponseSpec generateResponseSpec(
+			ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
 
-        Consumer<HttpHeaders> httpHeadersConsumer = (httpHeaders -> httpHeaders.putAll(httpRequest.getRequestHeaders()));
-        return webClient.method(httpRequest.getHttpMethod())
-                .uri(httpRequest.getUrl())
-                .headers(httpHeadersConsumer)
-                .body(Mono.just(httpRequest.getRequest()), httpRequest.getRequestType())
-                .retrieve();
-    }
+		Consumer<HttpHeaders> httpHeadersConsumer = (httpHeaders -> httpHeaders
+				.putAll(httpRequest.getRequestHeaders()));
+		RequestBodySpec webClientBuilder = webClient.method(httpRequest.getHttpMethod()).uri(httpRequest.getUrl())
+				.headers(httpHeadersConsumer);
+
+		// set only when provided
+		if (Objects.nonNull(httpRequest.getRequest()) && Objects.nonNull(httpRequest.getRequestType())) {
+			webClientBuilder.body(Mono.just(httpRequest.getRequest()), httpRequest.getRequestType());
+		}
+
+		return webClientBuilder.retrieve();
+
+	}
 
     /**
      * Generates retry spec for the request based on config provided.
