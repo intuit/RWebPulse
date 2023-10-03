@@ -58,10 +58,6 @@ public class CommonSpringWebClientTest {
 	    Mockito.doReturn(requestBodyUriSpec).when(requestBodyUriSpec).uri("test-url");
 	    Mockito.when(requestBodyUriSpec.headers(Mockito.any())).thenReturn(requestBodySpec);
 
-		Mockito.when(headersSpec.retrieve()).thenReturn(responseSpec);
-		Mockito.when(responseSpec.bodyToMono(ParameterizedTypeReference.forType(String.class)))
-				.thenReturn(Mono.just("ztest"));
-
 		commonSpringWebClient.syncHttpResponse(clientHttpRequest);
 	}
 
