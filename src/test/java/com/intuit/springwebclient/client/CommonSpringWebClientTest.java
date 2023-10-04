@@ -1,7 +1,6 @@
 package com.intuit.springwebclient.client;
 
-import com.intuit.springwebclient.entity.ClientHttpRequest;
-import com.intuit.springwebclient.entity.ClientHttpRequest.ClientHttpRequestBuilder;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,8 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.UnknownContentTypeException;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import com.intuit.springwebclient.entity.ClientHttpRequest;
+import com.intuit.springwebclient.entity.ClientHttpRequest.ClientHttpRequestBuilder;
+
 import reactor.core.publisher.Mono;
-import java.util.function.Consumer;
 
 
 @ExtendWith(MockitoExtension.class)
