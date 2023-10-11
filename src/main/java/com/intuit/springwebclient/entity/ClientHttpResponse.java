@@ -13,11 +13,4 @@ public final class ClientHttpResponse<T>{
     private final HttpStatus status;
     private final boolean isSuccess2xx;
 
-    public int statusCode() {
-        return this.status.value();
-    }
-
-    public boolean isSuccess2xx() {
-        return this.isSuccess2xx;
-    }
 }
