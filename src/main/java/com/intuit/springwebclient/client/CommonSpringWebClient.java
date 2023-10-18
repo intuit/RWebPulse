@@ -44,34 +44,31 @@ public class CommonSpringWebClient {
      */
     public <REQUEST, RESPONSE> ClientHttpResponse<RESPONSE> syncHttpResponse(ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
 		try {
-			log.info("Executing http request for request={}, method={}", httpRequest.getUrl(),
+			log.info("Executing http request for request={}, method={}", httpRequest.getRequest(),
 					httpRequest.getHttpMethod());
-			return generateResponseSpec(httpRequest).toEntity(httpRequest.getResponseType()).map(resp -> {
-				return generateResponse(resp);
-			}).retryWhen(generateRetrySpec(httpRequest)).block();
-		} 
-		catch (final WebClientResponseException ex) {
+			return generateResponseSpec(httpRequest).toEntity(httpRequest.getResponseType())
+					.map(this::generateResponse).retryWhen(generateRetrySpec(httpRequest)).block();
+		} catch (final WebClientResponseException ex) {
 			final String errorMessage = String.format("Error in making rest call. Error=%s Headers=%s statusCode=%s",
 					ex.getResponseBodyAsString(), ex.getHeaders(), ex.getStatusCode());
 			return handleException(ex, errorMessage, HttpStatus.valueOf(ex.getStatusCode().value()), httpRequest);
+		} catch (final HttpStatusCodeException ex) {
+			final String errorMessage = String.format("Error in making rest call. Error=%s Headers=%s statusCode=%s",
+					ex.getResponseBodyAsString(), ex.getResponseHeaders(), ex.getStatusCode());
+			return handleException(ex, errorMessage, HttpStatus.valueOf(ex.getStatusCode().value()), httpRequest);
+		} catch (final UnknownContentTypeException ex) {
+			// It was observed that this exception was thrown whenever there was a HTTP 5XX error
+			// returned in the REST call. The handle went into `RestClientException` which is the parent
+			// class of `UnknownContentTypeException` and hence some contextual information was lost
+			final String errorMessage = String.format("Error in making rest call. Error=%s Headers=%s",
+					ex.getResponseBodyAsString(), ex.getResponseHeaders());
+			return handleException(ex, errorMessage, HttpStatus.valueOf(ex.getRawStatusCode()), httpRequest);
+		} catch (final Exception ex) {
+			final String errorMessage = String
+					.format("Error in making rest call. Error=%s", ex.getMessage());
+			return handleException(ex, errorMessage, HttpStatus.INTERNAL_SERVER_ERROR, httpRequest);
 		}
-		catch (final HttpStatusCodeException ex) {
-            final String errorMessage = String.format("Error in making rest call. Error=%s Headers=%s statusCode=%s",
-                    ex.getResponseBodyAsString(), ex.getResponseHeaders(),ex.getStatusCode());
-            return handleException(ex, errorMessage, HttpStatus.valueOf(ex.getStatusCode().value()), httpRequest);
-        } catch (final UnknownContentTypeException ex) {
-            // It was observed that this exception was thrown whenever there was a HTTP 5XX error
-            // returned in the REST call. The handle went into `RestClientException` which is the parent
-            // class of `UnknownContentTypeException` and hence some contextual information was lost
-            final String errorMessage = String.format("Error in making rest call. Error=%s Headers=%s",
-                    ex.getResponseBodyAsString(), ex.getResponseHeaders());
-            return handleException(ex, errorMessage, HttpStatus.valueOf(ex.getRawStatusCode()), httpRequest);
-        } catch (final Exception ex) {
-            final String errorMessage = String
-                    .format("Error in making rest call. Error=%s", ex.getMessage());
-            return handleException(ex, errorMessage, HttpStatus.INTERNAL_SERVER_ERROR, httpRequest);
-        }
-    }
+	}
 
     /**
 	 * Generate Web Client Response spec from http request.
@@ -105,7 +102,7 @@ public class CommonSpringWebClient {
 		return Retry
 				.fixedDelay(httpRequest.getClientRetryConfig().getMaxAttempts(),
 						Duration.ofSeconds(httpRequest.getClientRetryConfig().getBackOff()))
-				.doBeforeRetry(signal -> log.info("Retrying for request={}, retryCount={}", httpRequest.getUrl(),
+				.doBeforeRetry(signal -> log.info("Retrying for requestUrl={}, retryCount={}", httpRequest.getUrl(),
 						signal.totalRetries()))
 				.filter(httpRequest.getClientRetryConfig().getRetryFilter());
 	}
@@ -136,7 +133,7 @@ public class CommonSpringWebClient {
             final String errorMessage,
             final HttpStatus httpStatus,
             final ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
-        log.error("Exception while executing http request for request={}, status={}, errorMessage={}", httpRequest.getUrl(), httpStatus, errorMessage);
+        log.error("Exception while executing http request for requestUrl={}, status={}, errorMessage={}", httpRequest.getUrl(), httpStatus, errorMessage);
         httpRequest.getRetryHandlers()
                 .forEach(handlerId -> RetryHandlerFactory.getHandler(handlerId.toString()).checkAndThrowRetriableException(exception));
         return ClientHttpResponse.<RESPONSE>builder().error(errorMessage).status(httpStatus).build();
