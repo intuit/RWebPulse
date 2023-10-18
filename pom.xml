@@ -31,6 +31,7 @@
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
         <snakeyaml.version>1.31</snakeyaml.version>
+        <spring-webflux.version>2.7.16</spring-webflux.version>
     </properties>
     <scm>
         <connection>scm:git:git://github.com/intuit/rwebpulse.git</connection>
@@ -56,17 +57,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-web-reactive</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
@@ -75,32 +65,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <version>2.7.16</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework/spring-webflux -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.springframework/spring-web-reactive -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web-reactive</artifactId>
-            <version>5.0.0.M4</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpasyncclient -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpasyncclient</artifactId>
-            <version>4.1.5</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
+            <version>${spring-webflux.version}</version>
         </dependency>
 
 
@@ -119,17 +90,6 @@
                 <version>${junit.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.httpcomponents.client5</groupId>
-                <artifactId>httpclient5</artifactId>
-                <version>5.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents.core5</groupId>
-                <artifactId>httpcore5-reactive</artifactId>
-                <version>5.1</version>
             </dependency>
 
             <dependency>
