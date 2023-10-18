@@ -30,7 +30,7 @@
         <jacoco.version>0.8.8</jacoco.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
-        <snakeyaml.version>1.31</snakeyaml.version>
+        <snakeyaml.version>2.0</snakeyaml.version>
         <spring-webflux.version>2.7.16</spring-webflux.version>
     </properties>
     <scm>
