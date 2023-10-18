@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,6 @@ import com.intuit.springwebclient.entity.ClientHttpRequest;
 import com.intuit.springwebclient.entity.ClientHttpResponse;
 import com.intuit.springwebclient.retryHandler.RetryHandlerFactory;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
@@ -28,11 +28,14 @@ import reactor.util.retry.Retry;
  */
 @Slf4j
 @Component
-@AllArgsConstructor
 public class CommonSpringWebClient {
     private final WebClient webClient;
 
-    /**
+	public CommonSpringWebClient(@Qualifier("RWebPulseClient") WebClient webClient) {
+		this.webClient = webClient;
+	}
+
+	/**
      * Execute Blocking http request.
      * @param httpRequest
      * @return
