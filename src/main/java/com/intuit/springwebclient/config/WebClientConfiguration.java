@@ -41,7 +41,7 @@ public class WebClientConfiguration {
                 .option(ChannelOption.SO_TIMEOUT, webClientConfiguration.getHttpClientConfig().getSocketTimeoutMillis());
     }
 
-    @Bean
+    @Bean("RWebPulseClient")
     public WebClient createWebClient(){
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(webHttpClient()))
