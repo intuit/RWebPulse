@@ -19,7 +19,7 @@ public class RetryHandlerFactoryTest {
     RetryHandler retryHandler = new DefaultRetryHandler();
     String handlerTestName = "default";
 
-    retryHandlerFactory.addHandler(handlerName, retryHandler);
+    retryHandlerFactory.addHandler(handlerTestName, retryHandler);
 
     Assertions.assertEquals(retryHandler, retryHandlerFactory.getHandler(handlerTestName));
   }
