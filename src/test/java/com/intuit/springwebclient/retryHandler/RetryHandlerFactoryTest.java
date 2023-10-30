@@ -16,7 +16,7 @@ public class RetryHandlerFactoryTest {
 
   @Test
   public void testAddAndGetHandler() {
-    RetryHandler retryHandler = new DefaultRetryHandler();
+    RetryHandler retryHandler = new RetryHandler();
     String handlerTestName = "default";
 
     retryHandlerFactory.addHandler(handlerTestName, retryHandler);
