@@ -44,20 +44,20 @@ public class WebClientConfiguration {
     }
 
     @Bean("RWebPulseClient")
-    public WebClient createWebClient(){
+    public WebClient createWebClient() {
+
+        WebClient.Builder builder = WebClient.builder();
+        builder.clientConnector(new ReactorClientHttpConnector(webHttpClient()))
+                .filter(webClientRequestFilter.getFilter());
         //if max-in-memory-size is not set in config then the building client with default size else creating client with custom max-in-memory-size
-        return webClientConfiguration.getMaxInMemorySize() > 0 ? WebClient.builder()
-                .clientConnector(new ReactorClientHttpConnector(webHttpClient()))
-                .filter(webClientRequestFilter.getFilter())
-                .exchangeStrategies(
-                        ExchangeStrategies.builder()
-                                .codecs(configurer -> configurer
-                                        .defaultCodecs()
-                                        .maxInMemorySize(webClientConfiguration.getMaxInMemorySize()))
-                                .build())
-                .build() : WebClient.builder()
-                .clientConnector(new ReactorClientHttpConnector(webHttpClient()))
-                .filter(webClientRequestFilter.getFilter())
-                .build();
+        if (webClientConfiguration.getMaxInMemorySize() > 0) {
+            builder.exchangeStrategies(
+                            ExchangeStrategies.builder()
+                                    .codecs(configurer -> configurer
+                                            .defaultCodecs()
+                                            .maxInMemorySize(webClientConfiguration.getMaxInMemorySize()))
+                                    .build());
+        }
+        return builder.build();
     }
 }
