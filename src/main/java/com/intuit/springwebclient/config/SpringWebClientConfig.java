@@ -10,4 +10,5 @@ import org.springframework.context.annotation.Configuration;
 public class SpringWebClientConfig {
     private HttpConnectionPoolConfig connectionPool;
     private HttpClientConfig httpClientConfig;
+    private int maxInMemorySize;
 }
