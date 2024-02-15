@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
@@ -23,6 +24,7 @@ import java.time.Duration;
 public class WebClientConfiguration {
     private final SpringWebClientConfig webClientConfiguration;
     private final WebClientRequestFilter webClientRequestFilter;
+
 
     @Bean
     public ConnectionProvider webClientConnectionProvider(){
@@ -42,10 +44,20 @@ public class WebClientConfiguration {
     }
 
     @Bean("RWebPulseClient")
-    public WebClient createWebClient(){
-        return WebClient.builder()
-                .clientConnector(new ReactorClientHttpConnector(webHttpClient()))
-                .filter(webClientRequestFilter.getFilter())
-                .build();
+    public WebClient createWebClient() {
+
+        WebClient.Builder builder = WebClient.builder();
+        builder.clientConnector(new ReactorClientHttpConnector(webHttpClient()))
+                .filter(webClientRequestFilter.getFilter());
+        //if max-in-memory-size is not set in config then the building client with default size else creating client with custom max-in-memory-size
+        if (webClientConfiguration.getMaxInMemorySize() > 0) {
+            builder.exchangeStrategies(
+                            ExchangeStrategies.builder()
+                                    .codecs(configurer -> configurer
+                                            .defaultCodecs()
+                                            .maxInMemorySize(webClientConfiguration.getMaxInMemorySize()))
+                                    .build());
+        }
+        return builder.build();
     }
 }
