@@ -3,7 +3,7 @@
 
     <groupId>com.intuit.rwebpulse</groupId>
     <artifactId>rwebpulse</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
     <name>Spring Web Client</name>
     <url>https://github.com/intuit/rwebpulse</url>
@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.12</version>
+        <version>3.1.11</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
 
