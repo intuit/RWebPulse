@@ -52,16 +52,16 @@ public class CommonSpringWebClientTest {
 
         commonSpringWebClient.syncHttpResponse(clientHttpRequest);
     }
-    
-	@Test
-	public void testSyncHttpResponseSuccessNoRequestBody() {
-		ClientHttpRequest clientHttpRequest = createClientHttpRequest().request(null).requestType(null).build();
-		Mockito.when(webClient.method(HttpMethod.GET)).thenReturn(requestBodyUriSpec);
-	    Mockito.doReturn(requestBodyUriSpec).when(requestBodyUriSpec).uri("test-url");
-	    Mockito.when(requestBodyUriSpec.headers(Mockito.any())).thenReturn(requestBodySpec);
 
-		commonSpringWebClient.syncHttpResponse(clientHttpRequest);
-	}
+    @Test
+    public void testSyncHttpResponseSuccessNoRequestBody() {
+        ClientHttpRequest clientHttpRequest = createClientHttpRequest().request(null).requestType(null).build();
+        Mockito.when(webClient.method(HttpMethod.GET)).thenReturn(requestBodyUriSpec);
+        Mockito.doReturn(requestBodyUriSpec).when(requestBodyUriSpec).uri("test-url");
+        Mockito.when(requestBodyUriSpec.headers(Mockito.any())).thenReturn(requestBodySpec);
+
+        commonSpringWebClient.syncHttpResponse(clientHttpRequest);
+    }
 
     @Test
     public void testHttpStatusCodeException() {
@@ -115,12 +115,12 @@ public class CommonSpringWebClientTest {
         httpHeadersConsumer.accept(httpHeadersMock);
 
         return ClientHttpRequest.builder()
-                .httpMethod(HttpMethod.GET)
-                .url("test-url")
-                .requestHeaders(httpHeadersMock)
-                .requestType(ParameterizedTypeReference.forType(String.class))
-                .request("hello")
-                .responseType(ParameterizedTypeReference.forType(String.class));
+            .httpMethod(HttpMethod.GET)
+            .url("test-url")
+            .requestHeaders(httpHeadersMock)
+            .requestType(ParameterizedTypeReference.forType(String.class))
+            .request("hello")
+            .responseType(ParameterizedTypeReference.forType(String.class));
     }
 
     private void mockRequestBody() {

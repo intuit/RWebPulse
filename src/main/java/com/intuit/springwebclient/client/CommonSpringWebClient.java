@@ -29,20 +29,20 @@ import reactor.util.retry.Retry;
 @Slf4j
 @Component
 public class CommonSpringWebClient {
-    private final WebClient webClient;
+	private final WebClient webClient;
 
 	public CommonSpringWebClient(@Qualifier("RWebPulseClient") WebClient webClient) {
 		this.webClient = webClient;
 	}
 
 	/**
-     * Execute Blocking http request.
-     * @param httpRequest
-     * @return
-     * @param <REQUEST>
-     * @param <RESPONSE>
-     */
-    public <REQUEST, RESPONSE> ClientHttpResponse<RESPONSE> syncHttpResponse(ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
+	 * Execute Blocking http request.
+	 * @param httpRequest
+	 * @return
+	 * @param <REQUEST>
+	 * @param <RESPONSE>
+	 */
+	public <REQUEST, RESPONSE> ClientHttpResponse<RESPONSE> syncHttpResponse(ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
 		try {
 			log.info("Executing http request for request={}, method={}", httpRequest.getRequest(),
 					httpRequest.getHttpMethod());
@@ -73,9 +73,9 @@ public class CommonSpringWebClient {
 		}
 	}
 
-    /**
+	/**
 	 * Generate Web Client Response spec from http request.
-	 * 
+	 *
 	 * @param httpRequest
 	 * @return
 	 */
@@ -96,11 +96,11 @@ public class CommonSpringWebClient {
 
 	}
 
-    /**
-     * Generates retry spec for the request based on config provided.
-     * @param httpRequest
-     * @return
-     */
+	/**
+	 * Generates retry spec for the request based on config provided.
+	 * @param httpRequest
+	 * @return
+	 */
 	private <REQUEST, RESPONSE> Retry generateRetrySpec(ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
 		return Retry
 				.fixedDelay(httpRequest.getClientRetryConfig().getMaxAttempts(),
@@ -112,7 +112,7 @@ public class CommonSpringWebClient {
 
 	/**
 	 * Handle Success response.
-	 * 
+	 *
 	 * @param response
 	 * @return
 	 * @param <RESPONSE>
@@ -122,24 +122,24 @@ public class CommonSpringWebClient {
 				.isSuccess2xx(response.getStatusCode().is2xxSuccessful()).build();
 	}
 
-    /**
-     * Handle Exception and send back response.
-     * @param exception
-     * @param errorMessage
-     * @param httpStatus
-     * @param httpRequest
-     * @return
-     * @param <RESPONSE>
-     */
-    private <REQUEST, RESPONSE> ClientHttpResponse<RESPONSE> handleException(
-            final Exception exception,
-            final String errorMessage,
-            final String responseBody,
-            final HttpStatus httpStatus,
-            final ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
-        log.error("Exception while executing http request for requestUrl={}, status={}, errorMessage={}", httpRequest.getUrl(), httpStatus, errorMessage);
-        httpRequest.getRetryHandlers()
-                .forEach(handlerId -> RetryHandlerFactory.getHandler(handlerId.toString()).checkAndThrowRetriableException(exception));
-        return ClientHttpResponse.<RESPONSE>builder().error(responseBody).status(httpStatus).build();
-    }
+	/**
+	 * Handle Exception and send back response.
+	 * @param exception
+	 * @param errorMessage
+	 * @param httpStatus
+	 * @param httpRequest
+	 * @return
+	 * @param <RESPONSE>
+	 */
+	private <REQUEST, RESPONSE> ClientHttpResponse<RESPONSE> handleException(
+			final Exception exception,
+			final String errorMessage,
+			final String responseBody,
+			final HttpStatus httpStatus,
+			final ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
+		log.error("Exception while executing http request for requestUrl={}, status={}, errorMessage={}", httpRequest.getUrl(), httpStatus, errorMessage);
+		httpRequest.getRetryHandlers()
+				.forEach(handlerId -> RetryHandlerFactory.getHandler(handlerId.toString()).checkAndThrowRetriableException(exception));
+		return ClientHttpResponse.<RESPONSE>builder().error(responseBody).status(httpStatus).build();
+	}
 }
