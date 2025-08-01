@@ -63,8 +63,6 @@ public class CommonSpringWebClient {
    */
   public <REQUEST, RESPONSE> Mono<ClientHttpResponse<RESPONSE>> asyncHttpResponse(
       ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
-    // --- MDC Propagation Step 1: Capture MDC from the calling thread ---
-    // This map holds the MDC context from the thread that initiates this request.
     final Map<String, String> mdcContextMap = MDC.getCopyOfContextMap();
     log.info("asyncHttpResponse initiated. Captured MDC from calling thread: {}", mdcContextMap);
 
@@ -85,7 +83,6 @@ public class CommonSpringWebClient {
           contextFromReactor.ifPresent(MDC::setContextMap);
         })
         .onErrorResume(WebClientResponseException.class, ex -> {
-          // MDC should be available here due to the `doOnEach` operator
           final String errorMessage = String.format(
               "Error in WebClient call (ResponseException). Error=%s Headers=%s statusCode=%s",
               ex.getResponseBodyAsString(), ex.getHeaders(), ex.getStatusCode());
@@ -93,7 +90,6 @@ public class CommonSpringWebClient {
               HttpStatus.valueOf(ex.getStatusCode().value()), httpRequest));
         })
         .onErrorResume(org.springframework.web.client.HttpStatusCodeException.class, ex -> {
-          // MDC should be available here
           final String errorMessage = String.format(
               "Error in WebClient call (HttpStatusCodeException). Error=%s Headers=%s statusCode=%s",
               ex.getResponseBodyAsString(), ex.getResponseHeaders(), ex.getStatusCode());
@@ -101,7 +97,6 @@ public class CommonSpringWebClient {
               HttpStatus.valueOf(ex.getStatusCode().value()), httpRequest));
         })
         .onErrorResume(org.springframework.web.client.UnknownContentTypeException.class, ex -> {
-          // MDC should be available here
           final String errorMessage = String.format(
               "Error in WebClient call (UnknownContentTypeException). Error=%s Headers=%s",
               ex.getResponseBodyAsString(), ex.getResponseHeaders());
@@ -109,7 +104,6 @@ public class CommonSpringWebClient {
               HttpStatus.valueOf(ex.getRawStatusCode()), httpRequest));
         })
         .onErrorResume(Exception.class, ex -> { // Catch any other unexpected exceptions
-          // MDC should be available here
           final String errorMessage = String.format(
               "Unhandled exception in WebClient call. Error=%s Cause=%s", ex.getMessage(),
               ex.getCause());
@@ -117,10 +111,6 @@ public class CommonSpringWebClient {
               handleExceptionInternal(ex, errorMessage, null, HttpStatus.INTERNAL_SERVER_ERROR,
                   httpRequest));
         })
-        // --- MDC Propagation Step 4: Clear MDC after stream completion ---
-        // This `doFinally` operator ensures that MDC is cleared on the thread
-        // that processes the final signal (onComplete or onError), preventing
-        // MDC leakage to subsequent tasks on the same thread pool thread.
         .doFinally(signalType -> {
           MDC.clear();
           log.info("MDC cleared after reactive chain completion (signal type: {}).", signalType);
@@ -162,12 +152,8 @@ public class CommonSpringWebClient {
         .fixedDelay(httpRequest.getClientRetryConfig().getMaxAttempts(),
             Duration.ofSeconds(httpRequest.getClientRetryConfig().getBackOff()))
         .doBeforeRetry(signal -> {
-          // --- MDC Logging in Retry Callback ---
-          // The `doOnEach` operator (placed earlier in the chain) ensures that
-          // MDC is already set on the current thread for this `doBeforeRetry` callback.
-          // So, we can directly access it for logging.
-          log.info("Retrying for requestUrl={}, retryCount={}. Current MDC: {}",
-              httpRequest.getUrl(), signal.totalRetries(), MDC.getCopyOfContextMap());
+          log.info("Retrying for requestUrl={}, retryCount={}",
+              httpRequest.getUrl(), signal.totalRetries());
         })
         .filter(httpRequest.getClientRetryConfig().getRetryFilter());
   }
@@ -204,12 +190,9 @@ public class CommonSpringWebClient {
       final String responseBody,
       final HttpStatus httpStatus,
       final ClientHttpRequest<REQUEST, RESPONSE> httpRequest) {
-    // --- MDC Logging in Error Handler ---
-    // MDC should be available here because `onErrorResume` is also within the scope
-    // of `doOnEach` that restores the context.
     log.error(
-        "Exception while executing http request for requestUrl={}, status={}, errorMessage={}. Current MDC: {}",
-        httpRequest.getUrl(), httpStatus, errorMessage, MDC.getCopyOfContextMap(),
+        "Exception while executing http request for requestUrl={}, status={}, errorMessage={}",
+        httpRequest.getUrl(), httpStatus, errorMessage,
         exception); // Include 'exception' for stack trace
     httpRequest.getRetryHandlers()
         .forEach(handlerId -> RetryHandlerFactory.getHandler(handlerId.toString())
