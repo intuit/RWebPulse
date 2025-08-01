@@ -1,7 +1,8 @@
 package com.intuit.springwebclient.client;
 
+import com.intuit.springwebclient.entity.ClientHttpRequest;
+import com.intuit.springwebclient.entity.ClientHttpRequest.ClientHttpRequestBuilder;
 import java.util.function.Consumer;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,118 +16,118 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.UnknownContentTypeException;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import com.intuit.springwebclient.entity.ClientHttpRequest;
-import com.intuit.springwebclient.entity.ClientHttpRequest.ClientHttpRequestBuilder;
-
 import reactor.core.publisher.Mono;
 
 
 @ExtendWith(MockitoExtension.class)
 public class CommonSpringWebClientTest {
 
-    @Mock
-    private WebClient webClient;
-    @Mock
-    private WebClient.RequestBodyUriSpec requestBodyUriSpec;
-    @Mock
-    private WebClient.RequestBodySpec requestBodySpec;
-    @Mock
-    WebClient.RequestHeadersSpec headersSpec;
-    @Mock
-    WebClient.ResponseSpec responseSpec;
+  @Mock
+  private WebClient webClient;
+  @Mock
+  private WebClient.RequestBodyUriSpec requestBodyUriSpec;
+  @Mock
+  private WebClient.RequestBodySpec requestBodySpec;
+  @Mock
+  WebClient.RequestHeadersSpec headersSpec;
+  @Mock
+  WebClient.ResponseSpec responseSpec;
 
-    @InjectMocks
-    private CommonSpringWebClient commonSpringWebClient;
-
-
-
-    @Test
-    public void testSyncHttpResponseSuccess() {
-        ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
-        mockRequestBody();
-
-        Mockito.when(headersSpec.retrieve()).thenReturn(responseSpec);
-        Mockito.when(responseSpec.bodyToMono(ParameterizedTypeReference.forType(String.class))).thenReturn(Mono.just("ztest"));
+  @InjectMocks
+  private CommonSpringWebClient commonSpringWebClient;
 
 
-        commonSpringWebClient.syncHttpResponse(clientHttpRequest);
-    }
+  @Test
+  public void testSyncHttpResponseSuccess() {
+    ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
+    mockRequestBody();
 
-    @Test
-    public void testSyncHttpResponseSuccessNoRequestBody() {
-        ClientHttpRequest clientHttpRequest = createClientHttpRequest().request(null).requestType(null).build();
-        Mockito.when(webClient.method(HttpMethod.GET)).thenReturn(requestBodyUriSpec);
-        Mockito.doReturn(requestBodyUriSpec).when(requestBodyUriSpec).uri("test-url");
-        Mockito.when(requestBodyUriSpec.headers(Mockito.any())).thenReturn(requestBodySpec);
+    Mockito.when(headersSpec.retrieve()).thenReturn(responseSpec);
+    Mockito.when(responseSpec.bodyToMono(ParameterizedTypeReference.forType(String.class)))
+        .thenReturn(Mono.just("ztest"));
 
-        commonSpringWebClient.syncHttpResponse(clientHttpRequest);
-    }
+    commonSpringWebClient.syncHttpResponse(clientHttpRequest);
+  }
 
-    @Test
-    public void testHttpStatusCodeException() {
+  @Test
+  public void testSyncHttpResponseSuccessNoRequestBody() {
+    ClientHttpRequest clientHttpRequest = createClientHttpRequest().request(null).requestType(null)
+        .build();
+    Mockito.when(webClient.method(HttpMethod.GET)).thenReturn(requestBodyUriSpec);
+    Mockito.doReturn(requestBodyUriSpec).when(requestBodyUriSpec).uri("test-url");
+    Mockito.when(requestBodyUriSpec.headers(Mockito.any())).thenReturn(requestBodySpec);
 
-        ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
-        mockRequestBody();
+    commonSpringWebClient.syncHttpResponse(clientHttpRequest);
+  }
 
-        HttpClientErrorException httpClientErrorException = Mockito.mock(HttpClientErrorException.class);
-        Mockito.when(httpClientErrorException.getResponseBodyAsString()).thenReturn("Page not found");
-        Mockito.when(httpClientErrorException.getResponseHeaders()).thenReturn(new HttpHeaders());
-        Mockito.when(httpClientErrorException.getStatusCode()).thenReturn(HttpStatus.valueOf(404));
+  @Test
+  public void testHttpStatusCodeException() {
 
-        Mockito.when(headersSpec.retrieve()).thenThrow(httpClientErrorException);
+    ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
+    mockRequestBody();
 
-        commonSpringWebClient.syncHttpResponse(clientHttpRequest);
-    }
+    HttpClientErrorException httpClientErrorException = Mockito.mock(
+        HttpClientErrorException.class);
+    Mockito.when(httpClientErrorException.getResponseBodyAsString()).thenReturn("Page not found");
+    Mockito.when(httpClientErrorException.getResponseHeaders()).thenReturn(new HttpHeaders());
+    Mockito.when(httpClientErrorException.getStatusCode()).thenReturn(HttpStatus.valueOf(404));
 
-    @Test
-    public void testUnknownContentTypeException() {
-        ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
-        mockRequestBody();
+    Mockito.when(headersSpec.retrieve()).thenThrow(httpClientErrorException);
 
-        UnknownContentTypeException unknownContentTypeException = Mockito.mock(UnknownContentTypeException.class);
-        Mockito.when(unknownContentTypeException.getResponseBodyAsString()).thenReturn("Page not found");
-        Mockito.when(unknownContentTypeException.getResponseHeaders()).thenReturn(new HttpHeaders());
-        Mockito.when(unknownContentTypeException.getRawStatusCode()).thenReturn(415);
+    commonSpringWebClient.syncHttpResponse(clientHttpRequest);
+  }
 
-        Mockito.when(headersSpec.retrieve()).thenThrow(unknownContentTypeException);
+  @Test
+  public void testUnknownContentTypeException() {
+    ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
+    mockRequestBody();
 
-        commonSpringWebClient.syncHttpResponse(clientHttpRequest);
-    }
+    UnknownContentTypeException unknownContentTypeException = Mockito.mock(
+        UnknownContentTypeException.class);
+    Mockito.when(unknownContentTypeException.getResponseBodyAsString())
+        .thenReturn("Page not found");
+    Mockito.when(unknownContentTypeException.getResponseHeaders()).thenReturn(new HttpHeaders());
+    Mockito.when(unknownContentTypeException.getRawStatusCode()).thenReturn(415);
 
-    @Test
-    public void testOtherException() {
-        ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
-        mockRequestBody();
+    Mockito.when(headersSpec.retrieve()).thenThrow(unknownContentTypeException);
 
-        Mockito.when(headersSpec.retrieve()).thenThrow(IllegalArgumentException.class);
+    commonSpringWebClient.syncHttpResponse(clientHttpRequest);
+  }
 
-        commonSpringWebClient.syncHttpResponse(clientHttpRequest);
-    }
+  @Test
+  public void testOtherException() {
+    ClientHttpRequest clientHttpRequest = createClientHttpRequest().build();
+    mockRequestBody();
 
-    private ClientHttpRequestBuilder<Object, Object> createClientHttpRequest() {
-        HttpHeaders httpHeadersMock = new HttpHeaders();
-        Consumer<HttpHeaders> httpHeadersConsumer = new Consumer<HttpHeaders>() {
-            @Override
-            public void accept(HttpHeaders httpHeaders) {
-                return;
-            }
-        };
-        httpHeadersConsumer.accept(httpHeadersMock);
+    Mockito.when(headersSpec.retrieve()).thenThrow(IllegalArgumentException.class);
 
-        return ClientHttpRequest.builder()
-            .httpMethod(HttpMethod.GET)
-            .url("test-url")
-            .requestHeaders(httpHeadersMock)
-            .requestType(ParameterizedTypeReference.forType(String.class))
-            .request("hello")
-            .responseType(ParameterizedTypeReference.forType(String.class));
-    }
+    commonSpringWebClient.syncHttpResponse(clientHttpRequest);
+  }
 
-    private void mockRequestBody() {
-        Mockito.when(webClient.method(HttpMethod.GET)).thenReturn(requestBodyUriSpec);
-        Mockito.doReturn(requestBodyUriSpec).when(requestBodyUriSpec).uri("test-url");
-        Mockito.when(requestBodyUriSpec.headers(Mockito.any())).thenReturn(requestBodySpec);
-        Mockito.when(requestBodySpec.body("hello", ParameterizedTypeReference.forType(String.class))).thenReturn(headersSpec);
-    }
+  private ClientHttpRequestBuilder<Object, Object> createClientHttpRequest() {
+    HttpHeaders httpHeadersMock = new HttpHeaders();
+    Consumer<HttpHeaders> httpHeadersConsumer = new Consumer<HttpHeaders>() {
+      @Override
+      public void accept(HttpHeaders httpHeaders) {
+        return;
+      }
+    };
+    httpHeadersConsumer.accept(httpHeadersMock);
+
+    return ClientHttpRequest.builder()
+        .httpMethod(HttpMethod.GET)
+        .url("test-url")
+        .requestHeaders(httpHeadersMock)
+        .requestType(ParameterizedTypeReference.forType(String.class))
+        .request("hello")
+        .responseType(ParameterizedTypeReference.forType(String.class));
+  }
+
+  private void mockRequestBody() {
+    Mockito.when(webClient.method(HttpMethod.GET)).thenReturn(requestBodyUriSpec);
+    Mockito.doReturn(requestBodyUriSpec).when(requestBodyUriSpec).uri("test-url");
+    Mockito.when(requestBodyUriSpec.headers(Mockito.any())).thenReturn(requestBodySpec);
+    Mockito.when(requestBodySpec.body("hello", ParameterizedTypeReference.forType(String.class)))
+        .thenReturn(headersSpec);
+  }
 }
