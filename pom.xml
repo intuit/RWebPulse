@@ -3,7 +3,7 @@
 
     <groupId>com.intuit.rwebpulse</groupId>
     <artifactId>rwebpulse</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
     <name>Spring Web Client</name>
     <url>https://github.com/intuit/rwebpulse</url>
@@ -72,6 +72,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
             <version>${spring-webflux.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
         </dependency>
 
 
