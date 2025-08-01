@@ -73,6 +73,11 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
             <version>${spring-webflux.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
 
 
     </dependencies>
