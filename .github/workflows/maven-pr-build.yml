@@ -41,7 +41,7 @@ jobs:
         server-id: ossrh
         server-username: OSSRH_USERNAME
         server-password: OSSRH_PASSWORD
-        gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+        gpg-private-key: 4649EDE7856317F53001F0651C7304BB5D9F0BB9
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
     - name: Build with Maven
@@ -50,9 +50,9 @@ jobs:
     - name: Build and publish to Maven Central Snapshots
       run: mvn -B deploy --file pom.xml
       env:
-        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        OSSRH_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        OSSRH_USERNAME: MarUdI
+        OSSRH_PASSWORD: zOrct1Xl28BRrO1ozF2qPzZEWNMzB1nak
+        MAVEN_GPG_PASSPHRASE: Snsvkl@2002
 
     - name: Upload main JAR artifact (backup)
       uses: actions/upload-artifact@v4
