@@ -3,7 +3,7 @@
 
     <groupId>com.intuit.rwebpulse</groupId>
     <artifactId>rwebpulse</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Spring Web Client</name>
     <url>https://github.com/intuit/rwebpulse</url>
@@ -108,6 +108,15 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
