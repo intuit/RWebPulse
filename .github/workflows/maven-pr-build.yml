@@ -25,13 +25,18 @@ jobs:
         architecture: x64
         cache: maven
 
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+    - name: Set PR version
+      run: |
+        # Create a unique version for this PR build
+        PR_VERSION="1.0.4-PR${{ github.event.number }}-SNAPSHOT"
+        echo "PR_VERSION=$PR_VERSION" >> $GITHUB_ENV
+        # Update the version in pom.xml for this build
+        mvn versions:set -DnewVersion=$PR_VERSION -DgenerateBackupPoms=false
 
-    - name: Set up Apache Maven Central
-      uses: actions/setup-java@v2
+    - name: Set up Maven Central for publishing
+      uses: actions/setup-java@v3
       with: # running setup-java again overwrites the settings.xml
-        java-version: 17
+        java-version: '17'
         distribution: 'adopt'
         server-id: ossrh
         server-username: OSSRH_USERNAME
@@ -39,9 +44,80 @@ jobs:
         gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
         gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
-    - name: Publish to Apache Maven Central
-      run:  mvn -Prelease deploy
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Build and publish to Maven Central Snapshots
+      run: mvn -B deploy --file pom.xml
       env:
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         OSSRH_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+    - name: Upload main JAR artifact (backup)
+      uses: actions/upload-artifact@v4
+      with:
+        name: rwebpulse-jar-pr${{ github.event.number }}
+        path: target/rwebpulse-*.jar
+        retention-days: 30
+
+    - name: Upload sources JAR artifact (backup)
+      uses: actions/upload-artifact@v4
+      with:
+        name: rwebpulse-sources-pr${{ github.event.number }}
+        path: target/rwebpulse-*-sources.jar
+        retention-days: 30
+
+    - name: Upload javadoc JAR artifact (backup)
+      uses: actions/upload-artifact@v4
+      with:
+        name: rwebpulse-javadoc-pr${{ github.event.number }}
+        path: target/rwebpulse-*-javadoc.jar
+        retention-days: 30
+
+    - name: Log coverage percentage
+      run: |
+        echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
+        echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
+
+    - name: Upload JaCoCo coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: jacoco-report-pr${{ github.event.number }}
+        path: target/site/jacoco/
+        retention-days: 30
+
+    - name: Create artifact summary
+      run: |
+        echo "## 🚀 PR Build Published to Maven Central Snapshots" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The following artifacts have been **published** to Maven Central Snapshots for testing:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📦 Published Artifacts:" >> $GITHUB_STEP_SUMMARY
+        echo "- **Group ID**: \`com.intuit.rwebpulse\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Artifact ID**: \`rwebpulse\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Version**: \`${{ env.PR_VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔧 How to use in your project:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Maven:**" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`xml" >> $GITHUB_STEP_SUMMARY
+        echo "<dependency>" >> $GITHUB_STEP_SUMMARY
+        echo "    <groupId>com.intuit.rwebpulse</groupId>" >> $GITHUB_STEP_SUMMARY
+        echo "    <artifactId>rwebpulse</artifactId>" >> $GITHUB_STEP_SUMMARY
+        echo "    <version>${{ env.PR_VERSION }}</version>" >> $GITHUB_STEP_SUMMARY
+        echo "</dependency>" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Gradle:**" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`gradle" >> $GITHUB_STEP_SUMMARY
+        echo "implementation 'com.intuit.rwebpulse:rwebpulse:${{ env.PR_VERSION }}'" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📍 Repository:" >> $GITHUB_STEP_SUMMARY
+        echo "The artifacts are available in the **Maven Central Snapshots** repository:" >> $GITHUB_STEP_SUMMARY
+        echo "\`https://oss.sonatype.org/content/repositories/snapshots/\`" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Additional Resources:" >> $GITHUB_STEP_SUMMARY
+        echo "- **JaCoCo Coverage Report**: Available in the jacoco-report artifact above" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backup Artifacts**: Also uploaded to GitHub Actions for direct download" >> $GITHUB_STEP_SUMMARY
