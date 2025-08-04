@@ -1,9 +1,8 @@
 # If the PR has the label release:major, release:minor, or release:patch, this will override bump_version_scheme.
 # https://github.com/marketplace/actions/release-tag-new-action
-on: 
-  push:
-    branches:
-      - master
+on:
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   release-on-push:
