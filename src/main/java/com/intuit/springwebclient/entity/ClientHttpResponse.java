@@ -10,6 +10,7 @@ public final class ClientHttpResponse<T>{
 
     private final T response;
     private final String error;
+    private final Throwable exception;
     private final HttpStatusCode status;
     private final boolean isSuccess2xx;
 
