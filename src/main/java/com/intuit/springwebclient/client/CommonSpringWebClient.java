@@ -196,6 +196,6 @@ public class CommonSpringWebClient {
     httpRequest.getRetryHandlers()
         .forEach(handlerId -> RetryHandlerFactory.getHandler(handlerId.toString())
             .checkAndThrowRetriableException(exception));
-    return ClientHttpResponse.<RESPONSE>builder().error(responseBody).status(httpStatus).build();
+    return ClientHttpResponse.<RESPONSE>builder().error(responseBody).exception(exception).status(httpStatus).build();
   }
 }
